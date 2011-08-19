@@ -5,7 +5,7 @@
 
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 byte ip[] = { 192, 168, 0, 10 };
-PusherClient client("9c4864536a647d3254b6");
+PusherClient client("your-api-key-here");
 Servo leftServo; 
 Servo rightServo; 
 
