@@ -14,7 +14,8 @@ Included with this library is an example, called RobotExample, that uses Pusher 
 
 ### Connecting to Pusher
 
-'''PusherClient client("your-api-key-here");
+```
+PusherClient client("your-api-key-here");
 
 if(client.connect()) {
 
@@ -32,7 +33,8 @@ void loop() {
 
   client.monitor();  //Must have a call to monitor() inside loop()
 
-}'''
+}
+```
 
 
 ### Subscribing to a Public Channel
