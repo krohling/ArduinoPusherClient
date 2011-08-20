@@ -73,4 +73,4 @@ void handleAllEvents(String data) {
 
 ## Credits
 
-Arduino Pusher Client uses the HashMap library developed by Alexander Brevig.
+Arduino Pusher Client uses the [HashMap](http://www.arduino.cc/playground/Code/HashMap) library developed by Alexander Brevig.
