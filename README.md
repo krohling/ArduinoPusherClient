@@ -14,25 +14,19 @@ Included with this library is an example, called RobotExample, that uses Pusher 
 
 ### Connecting to Pusher
 
+<code>
 PusherClient client("your-api-key-here");
-
 if(client.connect()) {
-
   //Connected!
-
 }
-
 else {
-
   //Uh oh.
-
 }
 
 void loop() {
-
   client.monitor();  //Must have a call to monitor() inside loop()
-
 }
+</code>
 
 ### Subscribing to a Public Channel
 
