@@ -30,45 +30,46 @@ void loop() {
 ```
 
 
-### Subscribing to a Public Channel
+### Channels
 
-client.subscribe("my-channel");
+```
+client.subscribe("my-channel");  //Subscribing to a Public Channel
 
-### Subscribing to a Private Channel
+client.subscribe("private-my-channel", "my-auth-token");  //Subscribing to a Private Channel
 
-client.subscribe("private-my-channel", "my-auth-token");
+int userId = 123;
+client.subscribe("presence-my-channel", "my-auth-token", userId); //Subscribing to a Precense Channel
 
-### Subscribing to a Presence Channel
+client.unsubscribe("my-channel");  //Unsubscribing to a Channel
 
-client.subscribe("presence-my-channel", "my-auth-token", 123); //123 = user_id
-
-### Unsubscribing from a Channel
-
-client.unsubscribe("my-channel");
-
-### Binding to Events
-
-client.bind("my-event", handleMyEvent);
-
-void handleMyEvent(String data) {
-
-   //Do stuff here
-
-}
+```
 
 ### Triggering Events
 
+```
 client.triggerEvent("my-event", "some data about my-event");
+```
+
+### Binding to Events
+
+```
+client.bind("my-event", handleMyEvent);
+
+void handleMyEvent(String data) {
+   //Do stuff here
+}
+```
+
 
 ### Binding to all Events
 
+```
 client.bindAll(handleAllEvents);
 
 void handleAllEvents(String data) {
-
    //Do stuff here
-
 }
+```
 
 ## Credits
 
