@@ -33,14 +33,18 @@ void loop() {
 ### Channels
 
 ```
-client.subscribe("my-channel");  //Subscribing to a Public Channel
+//Subscribing to a Public Channel
+client.subscribe("my-channel");  
 
-client.subscribe("private-my-channel", "my-auth-token");  //Subscribing to a Private Channel
+//Subscribing to a Private Channel
+client.subscribe("private-my-channel", "my-auth-token");  
 
+//Subscribing to a Presence Channel
 int userId = 123;
-client.subscribe("presence-my-channel", "my-auth-token", userId); //Subscribing to a Precense Channel
+client.subscribe("presence-my-channel", "my-auth-token", userId); 
 
-client.unsubscribe("my-channel");  //Unsubscribing to a Channel
+//Unsubscribing to a Channel
+client.unsubscribe("my-channel");  
 
 ```
 
