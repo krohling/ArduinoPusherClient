@@ -30,7 +30,7 @@
 #ifndef HASHMAP_H
 #define HASHMAP_H
 
-#include <WProgram.h>
+#include <Arduino.h>
 
 /* Handle association */
 template<typename hash,typename map>

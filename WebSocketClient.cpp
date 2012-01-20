@@ -26,45 +26,43 @@
 #include <WString.h>
 #include <string.h>
 #include <stdlib.h>
-#include "WProgram.h"
 
-#ifdef WIFLY
-WebSocketClient::WebSocketClient(const char *hostname, String path, int port) :
-	_client(hostname, port)
-{
-    _port = port;
-    _hostname = hostname;
-    _path = path;
-}
-#else
-WebSocketClient::WebSocketClient(byte server[], String path, int port) :
-    _client(server, port)
-{
-    _port = port;
-    _path = path;
-    
-    _hostname = String();
-    int size = sizeof(server);
-    for (int i = 0; i < size; i++) {
-        _hostname += String(server[i]);
-        
-        if (i != size-1) {
-            _hostname += ".";
-        }
-    }
-    
-}
-#endif
+prog_char stringVar[] PROGMEM = "{0}";
+prog_char clientHandshakeLine1[] PROGMEM = "GET {0} HTTP/1.1";
+prog_char clientHandshakeLine2[] PROGMEM = "Upgrade: WebSocket";
+prog_char clientHandshakeLine3[] PROGMEM = "Connection: Upgrade";
+prog_char clientHandshakeLine4[] PROGMEM = "Host: {0}";
+prog_char clientHandshakeLine5[] PROGMEM = "Origin: ArduinoWebSocketClient";
+prog_char serverHandshake[] PROGMEM = "HTTP/1.1 101";
 
-bool WebSocketClient::connect() {
+PROGMEM const char *WebSocketClientStringTable[] =
+{   
+    stringVar,
+    clientHandshakeLine1,
+    clientHandshakeLine2,
+    clientHandshakeLine3,
+    clientHandshakeLine4,
+    clientHandshakeLine5,
+    serverHandshake
+};
+
+String WebSocketClient::getStringTableItem(int index) {
+    char buffer[35];
+    strcpy_P(buffer, (char*)pgm_read_word(&(WebSocketClientStringTable[index])));
+    return String(buffer);
+}
+
+bool WebSocketClient::connect(char hostname[], char path[], int port) {
     bool result = false;
-    if (_client.connect()) {
-        sendHandshake();
+
+    if (_client.connect(hostname, port)) {
+        sendHandshake(hostname, path);
         result = readHandshake();
     }
     
 	return result;
 }
+
 
 bool WebSocketClient::connected() {
     return _client.connected();
@@ -76,22 +74,16 @@ void WebSocketClient::disconnect() {
 
 void WebSocketClient::monitor () {
     char character;
-	if ((character = _client.read()) == 0) {
+    
+	if (_client.available() > 0 && (character = _client.read()) == 0) {
         String data = "";
-        bool done = false;
         bool endReached = false;
-        while (!done) {
+        while (!endReached) {
             character = _client.read();
-            if (character != -1) {
+            endReached = character == -1;
+
+            if (!endReached) {
                 data += character;
-                endReached = false;
-            }
-            else if(endReached) {
-                done = true;
-            }
-            else {
-                endReached = true;
-                delay(10);
             }
         }
         
@@ -105,41 +97,59 @@ void WebSocketClient::setDataArrivedDelegate(DataArrivedDelegate dataArrivedDele
 	  _dataArrivedDelegate = dataArrivedDelegate;
 }
 
+
+void WebSocketClient::sendHandshake(char hostname[], char path[]) {
+    String stringVar = getStringTableItem(0);
+    String line1 = getStringTableItem(1);
+    String line2 = getStringTableItem(2);
+    String line3 = getStringTableItem(3);
+    String line4 = getStringTableItem(4);
+    String line5 = getStringTableItem(5);
+    
+    line1.replace(stringVar, path);
+    line4.replace(stringVar, hostname);
+    
+    _client.println(line1);
+    _client.println(line2);
+    _client.println(line3);
+    _client.println(line4);
+    _client.println(line5);
+    _client.println();
+}
+
 bool WebSocketClient::readHandshake() {
     bool result = false;
     char character;
     String handshake = "", line;
+    int maxAttempts = 300, attempts = 0;
     
-    while((character = _client.read()) == -1) {}
-    handshake += character;
-    
-    while((line = readLine()) != "") {
-        handshake += line;
+    while(_client.available() == 0 && attempts < maxAttempts) 
+    { 
+        delay(100); 
+        attempts++;
     }
     
-    result = handshake.indexOf("HTTP/1.1 101 Web Socket Protocol Handshake") != -1;
+    while((line = readLine()) != "") {
+        handshake += line + '\n';
+    }
+    
+    //Serial.println(handshake);
+    
+    String response = getStringTableItem(6);
+    result = handshake.indexOf(response) != -1;
+    
+    if(!result) {
+        _client.stop();
+    }
     
     return result;
-}
-
-void WebSocketClient::sendHandshake() {
-    _client.print("GET ");
-    _client.print(_path);
-    _client.println(" HTTP/1.1");
-    _client.println("Upgrade: WebSocket");
-    _client.println("Connection: Upgrade");
-    _client.print("Host: ");
-    _client.print(_hostname);
-    _client.print(":");
-    _client.println(_port);
-    _client.println("Origin: ArduinoWebSocketClient");
-    _client.println();
 }
 
 String WebSocketClient::readLine() {
     String line = "";
     char character;
-    while((character = _client.read()) != '\n') {
+    
+    while(_client.available() > 0 && (character = _client.read()) != '\n') {
         if (character != '\r' && character != -1) {
             line += character;
         }
