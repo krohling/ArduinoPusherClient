@@ -5,7 +5,7 @@
 
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 byte ip[] = { 192, 168, 0, 10 };
-PusherClient client("your-api-key-here");
+PusherClient client;
 Servo leftServo; 
 Servo rightServo; 
 
@@ -22,7 +22,7 @@ void setup() {
   Serial.begin(9600);
   Ethernet.begin(mac, ip);
   
-  if(client.connect()) {
+  if(client.connect("your-api-key-here")) {
     client.bind("forward", moveForward);
     client.bind("backward", moveBackward);
     client.bind("turn_left", turnLeft);
