@@ -23,17 +23,15 @@
  */
 
 #include <PusherClient.h>
-#include <HashMap.h>
+#include <HashMap/HashMap.h>
 #include <WString.h>
 #include <string.h>
 #include <stdlib.h>
 
-int _currentMapIndex = 0;
 const byte HASH_SIZE = 10;
 typedef void (*EventDelegate)(String data);
 static EventDelegate _bindAllDelegate;
-static HashType<String,EventDelegate> _bindArray[HASH_SIZE];
-static HashMap<String,EventDelegate> _bindMap = HashMap<String,EventDelegate>( _bindArray, HASH_SIZE );
+static HashMap<String, EventDelegate, HASH_SIZE> _bindMap = HashMap<String, EventDelegate, HASH_SIZE>();
 
 prog_char stringVar0[] PROGMEM = "{0}";
 prog_char stringVar1[] PROGMEM = "{1}";
@@ -106,8 +104,7 @@ void PusherClient::bindAll(EventDelegate delegate) {
 }
 
 void PusherClient::bind(String eventName, EventDelegate delegate) {
-    _bindMap[_currentMapIndex](eventName, delegate);
-    _currentMapIndex++;
+    _bindMap[eventName] = delegate;
 }
 
 void PusherClient::subscribe(String channel) {
@@ -178,7 +175,7 @@ void PusherClient::dataArrived(WebSocketClient client, String data) {
         _bindAllDelegate(data);
     }
     
-    EventDelegate delegate = _bindMap.getValueOf(eventName);
+    EventDelegate delegate = _bindMap[eventName];
     if (delegate != NULL) {
         delegate(data);
     }
