@@ -29,34 +29,34 @@
 #include <string.h>
 #include <stdlib.h>
 #include <WString.h>
-#include <Client.h>
-#include "WProgram.h"
+#include "Arduino.h"
 #include <WebSocketClient.h>
 
 //Uncomment this to use WIFLY Client
 //#define WIFLY true
 
 class PusherClient {
-    
-	public:
-        PusherClient(String appId);
+
+    public:
+        PusherClient();
         typedef void (*EventDelegate)(String data);
-		bool connect();
+        bool connect(String appId);
         bool connected();
         void disconnect();
-		void monitor();
+        void monitor();
         void bindAll(EventDelegate delegate);
         void bind(String eventName, EventDelegate delegate);
         void subscribe(String channel);
         void subscribe(String channel, String auth);
-        void subscribe(String channel, String auth, int userId);
+        void subscribe(String channel, String auth, String userId);
         void triggerEvent(String eventName, String eventData);
         void unsubscribe(String channel);
-        static String parseMessageMember(String memberName, String data);
-	private:
+    private:
         String _appId;
-		WebSocketClient _client;
+        WebSocketClient _client;
+        static String getStringTableItem(int index);
         static void dataArrived(WebSocketClient client, String data);
+        static String parseMessageMember(String memberName, String data);
 };
 
 

@@ -23,36 +23,68 @@
  */
 
 #include <PusherClient.h>
-#include <HashMap.h>
+#include <HashMap/HashMap.h>
 #include <WString.h>
 #include <string.h>
 #include <stdlib.h>
-#include "WProgram.h"
 
-int _currentMapIndex = 0;
 const byte HASH_SIZE = 10;
 typedef void (*EventDelegate)(String data);
 static EventDelegate _bindAllDelegate;
-static HashType<String,EventDelegate> _bindArray[HASH_SIZE];
-static HashMap<String,EventDelegate> _bindMap = HashMap<String,EventDelegate>( _bindArray, HASH_SIZE );
+static HashMap<String, EventDelegate, HASH_SIZE> _bindMap = HashMap<String, EventDelegate, HASH_SIZE>();
 
-#ifdef WIFLY
-PusherClient::PusherClient(String appId) :
-	_client("ws.pusherapp.com", "/app/" + appId + "?client=js&version=1.9.0", 80)
+prog_char stringVar0[] PROGMEM = "{0}";
+prog_char stringVar1[] PROGMEM = "{1}";
+prog_char stringVar2[] PROGMEM = "{2}";
+prog_char pusherPath[] PROGMEM = "/app/{0}?client=js&version=1.9.0";
+prog_char pusherHostname[] PROGMEM = "ws.pusherapp.com";
+prog_char subscribeEventName[] PROGMEM = "pusher:subscribe";
+prog_char subscribeMessage1[] PROGMEM = "{\"channel\": \"{0}\" }";
+prog_char subscribeMessage2[] PROGMEM = "{\"channel\": \"{0}\", \"auth\": \"{1}\" }";
+prog_char subscribeMessage3[] PROGMEM = "{\"channel\": \"{0}\", \"auth\": \"{1}\", \"channel_data\": { \"user_id\": {2} } }";
+prog_char unsubscribeMessage[] PROGMEM = "{\"channel\": \"{0}\" }";
+prog_char triggerEventMessage[] PROGMEM = "{\"event\": \"{0}\", \"data\": {1} }";
+prog_char eventNameStart[] PROGMEM = "event";
+prog_char unsubscribeEventName[] PROGMEM = "pusher:unsubscribe";
+
+
+PROGMEM const char *stringTable[] =
+{   
+    stringVar0,
+    stringVar1,
+    stringVar2,
+    pusherPath,
+    pusherHostname,
+    subscribeEventName,
+    subscribeMessage1,
+    subscribeMessage2,
+    subscribeMessage3,
+    unsubscribeMessage,
+    triggerEventMessage,
+    eventNameStart,
+    unsubscribeEventName
+};
+
+String PusherClient::getStringTableItem(int index) {
+    char buffer[85];
+    strcpy_P(buffer, (char*)pgm_read_word(&(stringTable[index])));
+    return String(buffer);
+}
+
+PusherClient::PusherClient()
 { 
     _client.setDataArrivedDelegate(dataArrived);
 }
-#else
-byte server[] = { 174, 129, 22, 121 }; //ws.pusherapp.com
-PusherClient::PusherClient(String appId) :
-_client(server, "/app/" + appId + "?client=js&version=1.9.0", 80)
-{ 
-    _client.setDataArrivedDelegate(dataArrived);
-}
-#endif
 
-bool PusherClient::connect() {
-    return _client.connect();
+bool PusherClient::connect(String appId) {
+    String stringVar0 = getStringTableItem(0);
+    String path = getStringTableItem(3);
+    path.replace(stringVar0, appId);
+
+    char pathData[path.length() + 1];
+    path.toCharArray(pathData, path.length() + 1);
+    
+    return _client.connect("ws.pusherapp.com", pathData, 80);
 }
 
 bool PusherClient::connected() {
@@ -72,71 +104,81 @@ void PusherClient::bindAll(EventDelegate delegate) {
 }
 
 void PusherClient::bind(String eventName, EventDelegate delegate) {
-    _bindMap[_currentMapIndex](eventName, delegate);
-    _currentMapIndex++;
+    _bindMap[eventName] = delegate;
 }
 
 void PusherClient::subscribe(String channel) {
-    triggerEvent("pusher:subscribe", "{\"channel\": \"" + channel + "\" }");
+    String subscribeEventName = getStringTableItem(5);
+    String stringVar0 = getStringTableItem(0);
+    String message = getStringTableItem(6);
+    message.replace(stringVar0, channel);
+    triggerEvent(subscribeEventName, message);
 }
 
 void PusherClient::subscribe(String channel, String auth) {
-    triggerEvent("pusher:subscribe", "{\"channel\": \"" + channel + "\", \"auth\": \"" + auth + "\" }");
+    String subscribeEventName = getStringTableItem(5);
+    String stringVar0 = getStringTableItem(0);
+    String stringVar1 = getStringTableItem(1);
+    String message = getStringTableItem(7);
+    message.replace(stringVar0, channel);
+    message.replace(stringVar1, auth);
+    triggerEvent(subscribeEventName, message);
 }
 
-void PusherClient::subscribe(String channel, String auth, int userId) {
-    triggerEvent("pusher:subscribe", "{\"channel\": \"" + channel + "\", \"auth\": \"" + auth + "\", \"channel_data\": { \"user_id\": " + userId + " } }");
+void PusherClient::subscribe(String channel, String auth, String userId) {
+    String subscribeEventName = getStringTableItem(5);
+    String stringVar0 = getStringTableItem(0);
+    String stringVar1 = getStringTableItem(1);
+    String stringVar2 = getStringTableItem(2);
+    String message = getStringTableItem(8);
+    message.replace(stringVar0, channel);
+    message.replace(stringVar1, auth);
+    message.replace(stringVar2, userId);
+    triggerEvent(subscribeEventName, message);
 }
 
 void PusherClient::unsubscribe(String channel) {
-    triggerEvent("pusher:unsubscribe", "{\"channel\": \"" + channel + "\" }");
+    String unsubscribeEventName = getStringTableItem(12);
+    String stringVar0 = getStringTableItem(0);
+    String message = getStringTableItem(9);
+    message.replace(stringVar0, channel);
+    triggerEvent(unsubscribeEventName, message);
 }
 
 void PusherClient::triggerEvent(String eventName, String eventData) {
-    Serial.println("Triggering Event");
-    Serial.println("{\"event\": \"" + eventName + "\", \"data\": " + eventData + " }");
-    _client.send("{\"event\": \"" + eventName + "\", \"data\": " + eventData + " }");
+    /*
+    Serial.println("triggerEvent");
+    Serial.print("eventName: ");
+    Serial.println(eventName);
+    Serial.print("eventData: ");
+    Serial.println(eventData);
+    */
+    
+    String stringVar0 = getStringTableItem(0);
+    String stringVar1 = getStringTableItem(1);
+    String message = getStringTableItem(10);
+    
+    message.replace(stringVar0, eventName);
+    message.replace(stringVar1, eventData);
+    
+    _client.send(message);
 }
 
 
 void PusherClient::dataArrived(WebSocketClient client, String data) {
-    String eventNameStart = "event";
-    String eventName = parseMessageMember("event", data);
-    Serial.println(eventName);
+    Serial.println("dataArrived");
+    
+    String eventNameStart = getStringTableItem(11);
+    String eventName = parseMessageMember(eventNameStart, data);
     
     if (_bindAllDelegate != NULL) {
         _bindAllDelegate(data);
     }
     
-    EventDelegate delegate = _bindMap.getValueOf(eventName);
+    EventDelegate delegate = _bindMap[eventName];
     if (delegate != NULL) {
         delegate(data);
     }
-    
-    /*
-    if (eventName == "pusher:connection_established") {
-        String eventData = parseMessageMember("data", data);
-        String socketId = parseMessageMember("socket_id", eventData);
-        
-    }
-    else if(eventName == "pusher:connection_failed") {
-        
-    }
-    else if(eventName == "pusher:error") {
-        String message = parseMessageMember("message", data);
-        String code = parseMessageMember("code", data);
-        
-    }
-    else if(eventName == "pusher:heartbeat") {
-        String time = parseMessageMember("time", data);
-        
-    }
-    else {
-        String eventData = parseMessageMember("data", data);
-        String channel = parseMessageMember("channel", data);
-        
-    }
-    */
 }
 
 String PusherClient::parseMessageMember(String memberName, String data) {
@@ -167,5 +209,7 @@ String PusherClient::parseMessageMember(String memberName, String data) {
         } while (currentCharacter != '"' || previousCharacter == '\\');
     }
     
-    return data.substring(memberDataStart, memberDataEnd).replace("\\\"", "\"");
+    String result = data.substring(memberDataStart, memberDataEnd);
+    result.replace("\\\"", "\"");
+    return result;
 }
