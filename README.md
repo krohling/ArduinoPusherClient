@@ -9,16 +9,16 @@ Once you've cloned this repo locally, copy the ArduinoPusherClient directory int
 
 ## Examples
 
-Included with this library is an example, called RobotExample, that uses Pusher events to drive two Servos.  This example connects to a channel named "robot-channel" and binds to 5 events: forward, backward, turn_left, turn_right, and stop.  When the events are received the appropriate method gets called and adjusts the angle of the servo motors, driving the robot.
+Included with this library is an example, called RobotExample, that uses Pusher events to drive two Servos.  This example connects to a channel named "robot_channel" and binds to 5 events: forward, backward, turn_left, turn_right, and stop.  When the events are received the appropriate method gets called and adjusts the angle of the servo motors, driving the robot.
 
 ## How To Use This Library
 
 ### Connecting to Pusher
 
 ```
-PusherClient client("your-api-key-here");
+PusherClient client;
 
-if(client.connect()) {
+if(client.connect("your-api-key-here")) {
   //Connected!
 }
 else {
@@ -41,8 +41,7 @@ client.subscribe("my-channel");
 client.subscribe("private-my-channel", "my-auth-token");  
 
 //Subscribing to a Presence Channel
-int userId = 123;
-client.subscribe("presence-my-channel", "my-auth-token", userId); 
+client.subscribe("presence-my-channel", "my-auth-token", "my-user-id"); 
 
 //Unsubscribing to a Channel
 client.unsubscribe("my-channel");  
