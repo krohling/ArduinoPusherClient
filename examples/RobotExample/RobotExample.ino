@@ -4,7 +4,6 @@
 #include <PusherClient.h>
 
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
-byte ip[] = { 192, 168, 0, 10 };
 PusherClient client;
 Servo leftServo; 
 Servo rightServo; 
@@ -20,7 +19,11 @@ void setup() {
   rightServo.write(95);
   
   Serial.begin(9600);
-  Ethernet.begin(mac, ip);
+  if (Ethernet.begin(mac) == 0) {
+    Serial.println("Init Ethernet failed");
+    for(;;)
+      ;
+  }
   
   if(client.connect("your-api-key-here")) {
     client.bind("forward", moveForward);

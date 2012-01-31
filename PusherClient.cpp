@@ -146,14 +146,6 @@ void PusherClient::unsubscribe(String channel) {
 }
 
 void PusherClient::triggerEvent(String eventName, String eventData) {
-    /*
-    Serial.println("triggerEvent");
-    Serial.print("eventName: ");
-    Serial.println(eventName);
-    Serial.print("eventData: ");
-    Serial.println(eventData);
-    */
-    
     String stringVar0 = getStringTableItem(0);
     String stringVar1 = getStringTableItem(1);
     String message = getStringTableItem(10);
@@ -166,8 +158,6 @@ void PusherClient::triggerEvent(String eventName, String eventData) {
 
 
 void PusherClient::dataArrived(WebSocketClient client, String data) {
-    Serial.println("dataArrived");
-    
     String eventNameStart = getStringTableItem(11);
     String eventName = parseMessageMember(eventNameStart, data);
     
