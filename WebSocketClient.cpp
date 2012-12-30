@@ -22,143 +22,235 @@
  THE SOFTWARE.
  */
 
-#include <WebSocketClient.h>
-#include <WString.h>
-#include <string.h>
-#include <stdlib.h>
+#include "WebSocketClient.h"
 
-prog_char stringVar[] PROGMEM = "{0}";
-prog_char clientHandshakeLine1[] PROGMEM = "GET {0} HTTP/1.1";
+prog_char stringVar[] PROGMEM = "$";
+prog_char clientHandshakeLine1[] PROGMEM = "GET $ HTTP/1.1";
 prog_char clientHandshakeLine2[] PROGMEM = "Upgrade: WebSocket";
 prog_char clientHandshakeLine3[] PROGMEM = "Connection: Upgrade";
-prog_char clientHandshakeLine4[] PROGMEM = "Host: {0}";
+prog_char clientHandshakeLine4[] PROGMEM = "Host: $";
 prog_char clientHandshakeLine5[] PROGMEM = "Origin: ArduinoWebSocketClient";
 prog_char serverHandshake[] PROGMEM = "HTTP/1.1 101";
 
-PROGMEM const char *WebSocketClientStringTable[] =
+prog_char logConnectingWS[] PROGMEM = 			"Connecting to host.";
+prog_char logConnectionFailedWS[] PROGMEM = 	"Connection to host failed.";
+prog_char logHandShakingWS[] PROGMEM = 			"Handshaking.";
+prog_char logHandShakingFailedWS[] PROGMEM = 	"Handshaking failed.";
+prog_char logSendingData[] PROGMEM = 			"Sending data: ";
+prog_char logReceivedData[] PROGMEM = 			"Received data: ";
+
+PROGMEM const char* stringTableWebSocket[] =
 {   
-    stringVar,
-    clientHandshakeLine1,
-    clientHandshakeLine2,
-    clientHandshakeLine3,
-    clientHandshakeLine4,
-    clientHandshakeLine5,
-    serverHandshake
+    stringVar, 				//0
+    clientHandshakeLine1,	//1
+    clientHandshakeLine2,	//2
+    clientHandshakeLine3,	//3
+    clientHandshakeLine4,	//4
+    clientHandshakeLine5,	//5
+    serverHandshake			//6
 };
 
-String WebSocketClient::getStringTableItem(int index) {
-    char buffer[35];
-    strcpy_P(buffer, (char*)pgm_read_word(&(WebSocketClientStringTable[index])));
-    return String(buffer);
+PROGMEM const char* logMessageTableWebSocket[] =
+{   
+    logConnectingWS, 			//0
+    logConnectionFailedWS, 		//1
+	logHandShakingWS,			//2
+	logHandShakingFailedWS,		//3
+	logSendingData,				//4
+	logReceivedData,			//5
+};
+
+void WebSocketClient::getStringTableItem(int index, String& text)
+{
+ 	char* ptr = (char*)pgm_read_word(&(stringTableWebSocket[index]));
+	int len = strlen_P(ptr);
+	char buffer[len+1];
+	strcpy_P(buffer, ptr);
+	text = buffer;
 }
 
-bool WebSocketClient::connect(char hostname[], char path[], int port) {
-    bool result = false;
-
-    if (_client.connect(hostname, port)) {
-        sendHandshake(hostname, path);
-        result = readHandshake();
-    }
-    
-	return result;
+bool WebSocketClient::connect(const String& hostname, const String& path, int port)
+{
+	LogPrintLn(logMessageTableWebSocket, 0);
+	char hostNameArray[32];
+	hostname.toCharArray(hostNameArray, 32);
+	if (!_client.connect(hostNameArray, port))
+	{
+		LogPrintLn(logMessageTableWebSocket, 1);
+		return false;
+	}	
+	
+	LogPrintLn(logMessageTableWebSocket, 2);
+	if (!Handshake(hostname, path))
+	{
+		LogPrintLn(logMessageTableWebSocket, 3);
+		return false;
+	}
+	
+	return true;
 }
 
-
-bool WebSocketClient::connected() {
+bool WebSocketClient::connected() 
+{
     return _client.connected();
 }
 
-void WebSocketClient::disconnect() {
+void WebSocketClient::disconnect() 
+{
     _client.stop();
 }
 
-void WebSocketClient::monitor () {
+void WebSocketClient::setDataArrivedDelegate(DataArrivedDelegate dataArrivedDelegate)
+{
+	_dataArrivedDelegate = dataArrivedDelegate;
+}
+
+bool WebSocketClient::Handshake(const String& hostname, const String& path)
+{
+    if (!SendHandshake(hostname, path))
+		return false;
+    
+	if (!WaitHandshake(hostname, path))
+		return false;
+
+	return true;
+}
+
+bool WebSocketClient::WaitHandshake(const String& hostname, const String& path)
+{
+	bool foundHandShake = false;
+    String line;  
+    String param;  
+
+	//LogPrintLn("Wait to receive handshake");
+	
+	int maxAttempts = 50, attempts;
+    for(attempts = 0; attempts < maxAttempts; attempts++)
+	{ 
+		if (_client.available())
+			break;
+		
+		delay(100);
+    }
+	if (attempts == maxAttempts)
+	{
+		//LogPrintLn("Max attempts reached");
+		return false;
+	}
+		
+	getStringTableItem(6, param);
+	while(readLine(line), line.length()!=0) 
+	{
+		if (line.indexOf( param ) != -1)
+			foundHandShake = true;
+
+    }
+    if (!foundHandShake)
+		return false;
+
+	//LogPrintLn("Handshaking completed");
+	return true;
+}
+
+bool WebSocketClient::SendHandshake(const String& hostname, const String& path)
+{
+    String line;  
+    String param;  
+    
+	//LogPrintLn("Sending first handshake");
+	
+	getStringTableItem(0, param);
+
+	//line 1
+	getStringTableItem(1, line);
+    line.replace(param, path);
+    _client.println(line);
+	
+	//line 2
+	getStringTableItem(2, line);
+    _client.println(line);
+	
+	//line 3
+	getStringTableItem(3, line);
+    _client.println(line);
+	
+	//line 4
+	getStringTableItem(4, line);
+    line.replace(param, hostname);
+    _client.println(line);
+	
+	//line 5
+	getStringTableItem(5, line);
+    _client.println(line);
+	
+    //end of line
+	_client.println();
+	_client.flush();
+		
+	return true;
+}
+
+void WebSocketClient::readLine(String& line)
+{
     char character;
     
-	if (_client.available() > 0 && (character = _client.read()) == 0) {
-        String data = "";
-        bool endReached = false;
-        while (!endReached) {
-            character = _client.read();
-            endReached = character == -1;
-
-            if (!endReached) {
-                data += character;
-            }
-        }
-        
-        if (_dataArrivedDelegate != NULL) {
-            _dataArrivedDelegate(*this, data);
-        }
-    }
-}
-
-void WebSocketClient::setDataArrivedDelegate(DataArrivedDelegate dataArrivedDelegate) {
-	  _dataArrivedDelegate = dataArrivedDelegate;
-}
-
-
-void WebSocketClient::sendHandshake(char hostname[], char path[]) {
-    String stringVar = getStringTableItem(0);
-    String line1 = getStringTableItem(1);
-    String line2 = getStringTableItem(2);
-    String line3 = getStringTableItem(3);
-    String line4 = getStringTableItem(4);
-    String line5 = getStringTableItem(5);
+	line = "";
     
-    line1.replace(stringVar, path);
-    line4.replace(stringVar, hostname);
-    
-    _client.println(line1);
-    _client.println(line2);
-    _client.println(line3);
-    _client.println(line4);
-    _client.println(line5);
-    _client.println();
-}
-
-bool WebSocketClient::readHandshake() {
-    bool result = false;
-    char character;
-    String handshake = "", line;
-    int maxAttempts = 300, attempts = 0;
-    
-    while(_client.available() == 0 && attempts < maxAttempts) 
-    { 
-        delay(100); 
-        attempts++;
-    }
-    
-    while((line = readLine()) != "") {
-        handshake += line + '\n';
-    }
-    
-    String response = getStringTableItem(6);
-    result = handshake.indexOf(response) != -1;
-    
-    if(!result) {
-        _client.stop();
-    }
-    
-    return result;
-}
-
-String WebSocketClient::readLine() {
-    String line = "";
-    char character;
-    
-    while(_client.available() > 0 && (character = _client.read()) != '\n') {
-        if (character != '\r' && character != -1) {
+    while(_client.available() > 0 && (character = _client.read()) != '\n')
+	{
+        if (character != '\r' && character != -1)
+		{
             line += character;
         }
     }
-    
-    return line;
 }
 
-void WebSocketClient::send (String data) {
+void WebSocketClient::send(const String& data)
+{
     _client.print((char)0);
 	_client.print(data);
     _client.print((char)255);
+	_client.flush();
+	
+	LogPrint(logMessageTableWebSocket, 4);
+	LogPrintLn(data);
+}
+
+void WebSocketClient::send(const char data[])
+{
+    _client.print((char)0);
+	_client.print(data);
+    _client.print((char)255);
+	_client.flush();
+	
+	LogPrint(logMessageTableWebSocket, 4);
+	LogPrintLn(data);
+}
+
+void WebSocketClient::monitor()
+{
+	if (_client.available() > 0)
+	{
+		if (_client.read() == 0)
+		{
+			String message;
+			char character;			
+			
+			message.reserve(128);
+			
+			while(character = _client.read(), character != -1)
+			{
+				message += character;
+			}
+			
+			LogPrint(logMessageTableWebSocket, 5);
+			LogPrintLn(message);
+			
+			if (_dataArrivedDelegate != NULL)
+			{
+				_dataArrivedDelegate(message);
+			}
+		}
+	}
 }
 

@@ -62,7 +62,7 @@ class HashMap
     ||
     || @return The key at index idx
     */
-    K keyAt(unsigned int idx)
+    const K& keyAt(unsigned int idx)
     {
       return keys[idx];
     }
@@ -104,7 +104,7 @@ class HashMap
     ||
     || @return The const value for key
     */
-    const V& operator[](const K key) const
+    const V& operator[](const K& key) const
     {
       return operator[](key);
     }
@@ -120,7 +120,7 @@ class HashMap
     ||
     || @return The value for key
     */
-    V& operator[](const K key)
+    V& operator[](const K& key)
     {
       if (contains(key))
       {
@@ -145,7 +145,7 @@ class HashMap
     ||
     || @return The index of the key, or -1 if key does not exist
     */
-    unsigned int indexOf(K key)
+    unsigned int indexOf(const K& key)
     {
       for (int i = 0; i < currentIndex; i++)
       {
@@ -176,7 +176,7 @@ class HashMap
     ||
     || @return true if it is contained in this HashMap
     */
-    bool contains(K key)
+    bool contains(const K& key)
     {
       for (int i = 0; i < currentIndex; i++)
       {
@@ -205,7 +205,7 @@ class HashMap
     ||
     || @parameter key the key to remove from this HashMap
     */
-    void remove(K key)
+    void remove(const K& key)
     {
       int index = indexOf(key);
       if (contains(key))
