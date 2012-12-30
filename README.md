@@ -7,9 +7,13 @@ Blog: [World Domination Using Arduinos And Websockets](http://kevinrohling.wordp
 
 Once you've cloned this repo locally, copy the ArduinoPusherClient directory into your Arduino Sketchbook directory under Libraries then restart the Arduino IDE so that it notices the new library.  Now, under File\Examples you should see ArduinoPusherClient.  To use the library in your app, select Sketch\Import Library\ArduinoPusherClient.
 
+Remember to add your api id, key and secret inside pusherAppId, pusherKey and pusherSecret in PusherClient.cpp.
+
 ## Examples
 
-Included with this library is an example, called RobotExample, that uses Pusher events to drive two Servos.  This example connects to a channel named "robot_channel" and binds to 5 events: forward, backward, turn_left, turn_right, and stop.  When the events are received the appropriate method gets called and adjusts the angle of the servo motors, driving the robot.
+Included with this library are 2 example:
+1) RobotExample, that uses Pusher events to drive two Servos.  This example connects to a channel named "robot_channel" and binds to 5 events: forward, backward, turn_left, turn_right, and stop.  When the events are received the appropriate method gets called and adjusts the angle of the servo motors, driving the robot.
+2) private_channels, that register the client to a private channel, triggering client events into it.
 
 ## How To Use This Library
 
