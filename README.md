@@ -3,6 +3,8 @@ Blog: [World Domination Using Arduinos And Websockets](http://kevinrohling.wordp
 
 [Pusher] (http://www.pusherapp.com) is a Push Notification service that uses Websockets for relaying messages back and forth between clients.  This allows real time messaging between a diverse range of applications running on Web browsers, mobile devices and now Arduinos.  It is my hope that allowing devices to easily send information about themselves as well as respond to messages received from applications and other devices will result in some interesting applications.
 
+This fork adds support for private channel subscription (the auth string is computed internally), client event triggering, ping-pong events (to keep connection alive). 
+
 ## Installation instructions
 
 Once you've cloned this repo locally, copy the ArduinoPusherClient directory into your Arduino Sketchbook directory under Libraries then restart the Arduino IDE so that it notices the new library.  Now, under File\Examples you should see ArduinoPusherClient.  To use the library in your app, select Sketch\Import Library\ArduinoPusherClient.
@@ -19,18 +21,25 @@ Included with this library are 2 example:
 
 ### Connecting to Pusher
 
-```
-PusherClient client;
+Include the main header file:
+#include <PusherClient.h>
 
-if(client.connect("your-api-key-here")) {
-  //Connected!
-}
-else {
-  //Uh oh.
+Initialize Serial (for logging) and the ethernet lib:
+Serial.begin(9600);
+byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
+if (!Ethernet.begin(mac)) {
+  //error
 }
 
+
+Initialize the pusher lib:
+if(!Pusher.connect()) {
+  //error
+}
+
+Add the monitor function inside the loop function.
 void loop() {
-  client.monitor();  //Must have a call to monitor() inside loop()
+  Pusher.monitor();   //Must have a call to monitor() inside loop()
 }
 ```
 
@@ -42,10 +51,7 @@ void loop() {
 client.subscribe("my-channel");  
 
 //Subscribing to a Private Channel
-client.subscribe("private-my-channel", "my-auth-token");  
-
-//Subscribing to a Presence Channel
-client.subscribe("presence-my-channel", "my-auth-token", "my-user-id"); 
+client.subscribePrivate("private-my-channel");  
 
 //Unsubscribing to a Channel
 client.unsubscribe("my-channel");  
@@ -56,6 +62,7 @@ client.unsubscribe("my-channel");
 
 ```
 client.triggerEvent("my-event", "some data about my-event");
+client.triggerPrivateEvent("private-my-channel", "client-my-event", "some data about my-event");
 ```
 
 ### Binding to Events
