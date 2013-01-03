@@ -28,36 +28,63 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include <WString.h>
-#include "Arduino.h"
-#include <WebSocketClient.h>
+#include <Arduino.h>
 
-//Uncomment this to use WIFLY Client
-//#define WIFLY true
+#include "HashMap/HashMap.h"
+#include "WebSocketClient.h"
+#include "Logger.h"
 
-class PusherClient {
+//Define ENABLE_AUTH as 1 to subscribe to private channels and send client events.
+//Client events must be enabled from the pusher web configuration page.
+#define ENABLE_AUTH 1
 
+typedef void (*EventDelegate)(const String& name, const String& data);
+
+class PusherClient 
+{
     public:
         PusherClient();
-        typedef void (*EventDelegate)(String data);
-        bool connect(String appId);
-        bool connected();
-        void disconnect();
+        
+		bool connect();
         void monitor();
+        
+		bool connected();
+        void disconnect();
+        
+		void bind(const String& eventName, EventDelegate delegate);
         void bindAll(EventDelegate delegate);
-        void bind(String eventName, EventDelegate delegate);
-        void subscribe(String channel);
-        void subscribe(String channel, String auth);
-        void subscribe(String channel, String auth, String userId);
-        void triggerEvent(String eventName, String eventData);
-        void unsubscribe(String channel);
-    private:
-        String _appId;
+        
+		void subscribe(const String& channel);
+        void unsubscribe(const String& channel);
+		
+		void triggerEvent(const String& eventName, const String& eventData);
+
+#if (ENABLE_AUTH == 1)
+		void acquireSocketId(const String& eventData);
+		void subscribePrivate(const String& channel);
+        void triggerPrivateEvent(const String& channelName, const String& eventName, const String& eventData);
+#endif
+  
+		void KeepConnectionAlive();
+		
+	private:		
+        static void getStringTableItem(int index, String& text);
+        static void getPusherInfoItem(int index, String& text);
+		static void dataArrived(const String& data);
+        static void parseMessageMember(const String& message, const String& name, String& value);
+
+	private:	
         WebSocketClient _client;
-        static String getStringTableItem(int index);
-        static void dataArrived(WebSocketClient client, String data);
-        static String parseMessageMember(String memberName, String data);
+		unsigned long lastPingTime;
+		
+#if (ENABLE_AUTH == 1)
+		void getAuthString(const String& channel, String& auth);
+		void computeSha256(const String& text, String& sha);
+		String _socketid;
+#endif
+
 };
 
+extern PusherClient Pusher;
 
 #endif

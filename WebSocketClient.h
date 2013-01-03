@@ -27,29 +27,35 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include <WString.h>
 #include <Ethernet.h>
-#include "Arduino.h"
+#include <Arduino.h>
 
-//Uncomment this to use WIFLY Client
-#define WIFLY true
+#include "Logger.h"
 
 class WebSocketClient {
 	public:
-		typedef void (*DataArrivedDelegate)(WebSocketClient client, String data);
-		bool connect(char hostname[], char path[] = "/", int port = 80);
+		typedef void (*DataArrivedDelegate)(const String& data);
+		
+		bool connect(const String& hostname, const String& path, int port = 80);
         bool connected();
         void disconnect();
 		void monitor();
 		void setDataArrivedDelegate(DataArrivedDelegate dataArrivedDelegate);
-		void send(String data);
+		
+		void send(const String& data);
+		void send(const char data[]);
+		
 	private:
-        String getStringTableItem(int index);
-        void sendHandshake(char hostname[], char path[]);
-        EthernetClient _client;
+		static void getStringTableItem(int index, String& text);
+
+        bool Handshake(const String& hostname, const String& path);
+        bool SendHandshake(const String& hostname, const String& path);
+        bool WaitHandshake(const String& hostname, const String& path);
+        void readLine(String& line);
+
+	private:
+		EthernetClient _client;
         DataArrivedDelegate _dataArrivedDelegate;
-        bool readHandshake();
-        String readLine();
 };
 
 
