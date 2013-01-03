@@ -5,6 +5,8 @@ Blog: [World Domination Using Arduinos And Websockets](http://kevinrohling.wordp
 
 This fork adds support for private channel subscription (the auth string is computed internally), client event triggering, ping-pong events (to keep connection alive). 
 
+Since Arduino has very little RAM, remember to reduce memory allocations and fragmentation as much as possible. Each variable of type String should be passed by reference if possible. So function "void function(const String& i_param)" is ok, while "void function(String i_param)" is not (since it will cause Arduino to allocate a new String).
+
 ## Installation instructions
 
 Once you've cloned this repo locally, copy the ArduinoPusherClient directory into your Arduino Sketchbook directory under Libraries then restart the Arduino IDE so that it notices the new library.  Now, under File\Examples you should see ArduinoPusherClient.  To use the library in your app, select Sketch\Import Library\ArduinoPusherClient.
@@ -70,7 +72,7 @@ client.triggerPrivateEvent("private-my-channel", "client-my-event", "some data a
 ```
 client.bind("my-event", handleMyEvent);
 
-void handleMyEvent(String data) {
+void handleMyEvent(const String& eventName, const String& eventData) {
    //Do stuff here
 }
 ```
@@ -81,7 +83,7 @@ void handleMyEvent(String data) {
 ```
 client.bindAll(handleAllEvents);
 
-void handleAllEvents(String data) {
+void handleAllEvents(const String& eventName, const String& eventData) {
    //Do stuff here
 }
 ```
