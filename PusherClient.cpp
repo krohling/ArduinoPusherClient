@@ -36,7 +36,7 @@ static HashMap<String, EventDelegate, HASH_SIZE> _bindMap = HashMap<String, Even
 prog_char stringVar0[] PROGMEM = "{0}";
 prog_char stringVar1[] PROGMEM = "{1}";
 prog_char stringVar2[] PROGMEM = "{2}";
-prog_char pusherPath[] PROGMEM = "/app/{0}?client=js&version=1.9.0";
+prog_char pusherPath[] PROGMEM = "/app/{0}?client=js&version=2.1&protocol=7";
 prog_char pusherHostname[] PROGMEM = "ws.pusherapp.com";
 prog_char subscribeEventName[] PROGMEM = "pusher:subscribe";
 prog_char subscribeMessage1[] PROGMEM = "{\"channel\": \"{0}\" }";
