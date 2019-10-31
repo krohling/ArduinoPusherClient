@@ -33,22 +33,21 @@ typedef void (*EventDelegate)(String data);
 static EventDelegate _bindAllDelegate;
 static HashMap<String, EventDelegate, HASH_SIZE> _bindMap = HashMap<String, EventDelegate, HASH_SIZE>();
 
-prog_char stringVar0[] PROGMEM = "{0}";
-prog_char stringVar1[] PROGMEM = "{1}";
-prog_char stringVar2[] PROGMEM = "{2}";
-prog_char pusherPath[] PROGMEM = "/app/{0}?client=js&version=2.1&protocol=7";
-prog_char pusherHostname[] PROGMEM = "ws.pusherapp.com";
-prog_char subscribeEventName[] PROGMEM = "pusher:subscribe";
-prog_char subscribeMessage1[] PROGMEM = "{\"channel\": \"{0}\" }";
-prog_char subscribeMessage2[] PROGMEM = "{\"channel\": \"{0}\", \"auth\": \"{1}\" }";
-prog_char subscribeMessage3[] PROGMEM = "{\"channel\": \"{0}\", \"auth\": \"{1}\", \"channel_data\": { \"user_id\": {2} } }";
-prog_char unsubscribeMessage[] PROGMEM = "{\"channel\": \"{0}\" }";
-prog_char triggerEventMessage[] PROGMEM = "{\"event\": \"{0}\", \"data\": {1} }";
-prog_char eventNameStart[] PROGMEM = "event";
-prog_char unsubscribeEventName[] PROGMEM = "pusher:unsubscribe";
+const char stringVar0[] PROGMEM = "{0}";
+const char stringVar1[] PROGMEM = "{1}";
+const char stringVar2[] PROGMEM = "{2}";
+const char pusherPath[] PROGMEM = "/app/{0}?client=js&version=2.2.3&flash=false&protocol=7";
+const char pusherHostname[] PROGMEM = "ws-eu.pusherapp.com";
+const char subscribeEventName[] PROGMEM = "pusher:subscribe";
+const char subscribeMessage1[] PROGMEM = "{\"channel\": \"{0}\" }";
+const char subscribeMessage2[] PROGMEM = "{\"channel\": \"{0}\", \"auth\": \"{1}\" }";
+const char subscribeMessage3[] PROGMEM = "{\"channel\": \"{0}\", \"auth\": \"{1}\", \"channel_data\": { \"user_id\": {2} } }";
+const char unsubscribeMessage[] PROGMEM = "{\"channel\": \"{0}\" }";
+const char triggerEventMessage[] PROGMEM = "{\"event\": \"{0}\", \"data\": {1} }";
+const char eventNameStart[] PROGMEM = "event";
+const char unsubscribeEventName[] PROGMEM = "pusher:unsubscribe";
 
-
-PROGMEM const char *stringTable[] =
+PGM_P const stringTable[] PROGMEM =
 {   
     stringVar0,
     stringVar1,
@@ -83,8 +82,8 @@ bool PusherClient::connect(String appId) {
 
     char pathData[path.length() + 1];
     path.toCharArray(pathData, path.length() + 1);
-    
-    return _client.connect("ws.pusherapp.com", pathData, 80);
+
+    return _client.connect("ws-eu.pusher.com", pathData, 80);
 }
 
 bool PusherClient::connected() {

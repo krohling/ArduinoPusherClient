@@ -27,15 +27,15 @@
 #include <string.h>
 #include <stdlib.h>
 
-prog_char stringVar[] PROGMEM = "{0}";
-prog_char clientHandshakeLine1[] PROGMEM = "GET {0} HTTP/1.1";
-prog_char clientHandshakeLine2[] PROGMEM = "Upgrade: WebSocket";
-prog_char clientHandshakeLine3[] PROGMEM = "Connection: Upgrade";
-prog_char clientHandshakeLine4[] PROGMEM = "Host: {0}";
-prog_char clientHandshakeLine5[] PROGMEM = "Origin: ArduinoWebSocketClient";
-prog_char serverHandshake[] PROGMEM = "HTTP/1.1 101";
+const char stringVar[] PROGMEM = "{0}";
+const char clientHandshakeLine1[] PROGMEM = "GET {0} HTTP/1.1";
+const char clientHandshakeLine2[] PROGMEM = "Upgrade: WebSocket";
+const char clientHandshakeLine3[] PROGMEM = "Connection: Upgrade";
+const char clientHandshakeLine4[] PROGMEM = "Host: {0}";
+const char clientHandshakeLine5[] PROGMEM = "Origin: ArduinoWebSocketClient";
+const char serverHandshake[] PROGMEM = "HTTP/1.1 101";
 
-PROGMEM const char *WebSocketClientStringTable[] =
+PGM_P const WebSocketClientStringTable[] PROGMEM =
 {   
     stringVar,
     clientHandshakeLine1,
@@ -46,7 +46,7 @@ PROGMEM const char *WebSocketClientStringTable[] =
     serverHandshake
 };
 
-String WebSocketClient::getStringTableItem(int index) {
+String WebSocketClient::getStringSocketClientTableItem(int index) {
     char buffer[35];
     strcpy_P(buffer, (char*)pgm_read_word(&(WebSocketClientStringTable[index])));
     return String(buffer);
@@ -54,7 +54,7 @@ String WebSocketClient::getStringTableItem(int index) {
 
 bool WebSocketClient::connect(char hostname[], char path[], int port) {
     bool result = false;
-
+    
     if (_client.connect(hostname, port)) {
         sendHandshake(hostname, path);
         result = readHandshake();
@@ -72,7 +72,7 @@ void WebSocketClient::disconnect() {
     _client.stop();
 }
 
-void WebSocketClient::monitor () {
+void WebSocketClient::monitor() {
     char character;
     
 	if (_client.available() > 0 && (character = _client.read()) == 0) {
@@ -99,16 +99,17 @@ void WebSocketClient::setDataArrivedDelegate(DataArrivedDelegate dataArrivedDele
 
 
 void WebSocketClient::sendHandshake(char hostname[], char path[]) {
-    String stringVar = getStringTableItem(0);
-    String line1 = getStringTableItem(1);
-    String line2 = getStringTableItem(2);
-    String line3 = getStringTableItem(3);
-    String line4 = getStringTableItem(4);
-    String line5 = getStringTableItem(5);
+    String stringVar = getStringSocketClientTableItem(0);
+
+    String line1 = getStringSocketClientTableItem(1);
+    String line2 = getStringSocketClientTableItem(2);
+    String line3 = getStringSocketClientTableItem(3);
+    String line4 = getStringSocketClientTableItem(4);
+    String line5 = getStringSocketClientTableItem(5);
     
     line1.replace(stringVar, path);
     line4.replace(stringVar, hostname);
-    
+
     _client.println(line1);
     _client.println(line2);
     _client.println(line3);
@@ -133,7 +134,7 @@ bool WebSocketClient::readHandshake() {
         handshake += line + '\n';
     }
     
-    String response = getStringTableItem(6);
+    String response = getStringSocketClientTableItem(6);
     result = handshake.indexOf(response) != -1;
     
     if(!result) {
@@ -161,4 +162,3 @@ void WebSocketClient::send (String data) {
 	_client.print(data);
     _client.print((char)255);
 }
-
