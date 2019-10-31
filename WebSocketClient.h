@@ -44,7 +44,7 @@ class WebSocketClient {
 		void setDataArrivedDelegate(DataArrivedDelegate dataArrivedDelegate);
 		void send(String data);
 	private:
-        String getStringTableItem(int index);
+        String getStringSocketClientTableItem(int index);
         void sendHandshake(char hostname[], char path[]);
         EthernetClient _client;
         DataArrivedDelegate _dataArrivedDelegate;
