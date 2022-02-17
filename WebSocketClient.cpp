@@ -121,7 +121,7 @@ bool WebSocketClient::WaitHandshake(const String& hostname, const String& path)
     String line;  
     String param;  
 
-	//LogPrintLn("Wait to receive handshake");
+	LogPrintLn("Wait to receive handshake");
 	
 	int maxAttempts = 50, attempts;
     for(attempts = 0; attempts < maxAttempts; attempts++)
@@ -133,7 +133,7 @@ bool WebSocketClient::WaitHandshake(const String& hostname, const String& path)
     }
 	if (attempts == maxAttempts)
 	{
-		//LogPrintLn("Max attempts reached");
+		LogPrintLn("Max attempts reached");
 		return false;
 	}
 		
@@ -147,7 +147,7 @@ bool WebSocketClient::WaitHandshake(const String& hostname, const String& path)
     if (!foundHandShake)
 		return false;
 
-	//LogPrintLn("Handshaking completed");
+	LogPrintLn("Handshaking completed");
 	return true;
 }
 
@@ -156,13 +156,14 @@ bool WebSocketClient::SendHandshake(const String& hostname, const String& path)
     String line;  
     String param;  
     
-	//LogPrintLn("Sending first handshake");
+	LogPrintLn("Sending first handshake");
 	
 	getStringTableItem(0, param);
 
 	//line 1
 	getStringTableItem(1, line);
     line.replace(param, path);
+
     _client.println(line);
 	
 	//line 2

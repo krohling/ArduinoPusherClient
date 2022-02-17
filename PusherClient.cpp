@@ -45,8 +45,8 @@ const char* pusherInfos[] =
 const char stringVar0[]  = "#1";
 const char stringVar1[]  = "#2";
 const char stringVar2[]  = "#3";
-const char pusherPath[]  = "/app/#1?client=js&version=1.9.0";
-const char pusherHostname[]  = "ws.pusherapp.com";
+const char pusherPath[]  = "/app/#1?client=js&version=2.2.3&flash=false&protocol=7"; // "/app/#1?client=js&version=1.9.0";
+const char pusherHostname[]  = "ws-eu.pusher.com";
 const char subscribeEventName[]  = "pusher:subscribe";
 const char subscribeMessage1[]  = "{\"channel\":\"#1\"}";
 const char subscribeMessage2[]  = "{\"channel\":\"#1\",\"auth\":\"#2\"}";
@@ -147,15 +147,20 @@ bool PusherClient::connect()
     getPusherInfoItem(1, key);	
     path.replace(stringVar0, key);
 
+    Serial.println(host);
+    Serial.println(path);
+    
     if (!_client.connect(host, path, 80))
 	{
 		LogPrintLn(logMessageTablePusherClient, 0);
 		return false;
 	}	
 	
+
 #if (ENABLE_AUTH == 1)
 	while(_socketid.length() == 0)
-	{
+	{   
+		Serial.println(_socketid);
 		delay(100);
 		monitor();
 	}
@@ -170,8 +175,9 @@ bool PusherClient::connected()
     return _client.connected();
 }
 
-void PusherClient::disconnect() 
+void PusherClient::disconnect()
 {
+	_socketid = "";
     _client.disconnect();
 }
 
@@ -271,7 +277,7 @@ void PusherClient::dataArrived(const String& message)
 void PusherClient::parseMessageMember(const String& message, const String& name, String& value)
 {
 	//name must be in the "name" format
-	
+	Serial.println(message);
 	int memberNameStart = message.indexOf(name);
     if (memberNameStart == -1)
 	{
@@ -312,6 +318,7 @@ void PusherClient::parseMessageMember(const String& message, const String& name,
 #if (ENABLE_AUTH == 1)
 void connectionEstablished(const String& eventName, const String& eventData)
 {
+	Serial.println("connectionEstablished");
 	Pusher.acquireSocketId(eventData);
 }
 
