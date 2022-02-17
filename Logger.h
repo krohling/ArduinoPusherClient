@@ -4,22 +4,19 @@
 #define LOGGER_ENABLED 1
 
 #if LOGGER_ENABLED
-inline void LogPrint(PROGMEM const char** table, int index)
+inline void LogPrint(const char** table, int index)
 {
-	char* ptr = (char*)pgm_read_word(&(table[index]));
-	int len = strlen_P(ptr);
+	int len = strlen(table[index]);
 	char buffer[len+1];
-	strcpy_P(buffer, ptr);
-    
+	strcpy(buffer, table[index]);
 	Serial.print(buffer); 
 }
 
-inline void LogPrintLn(PROGMEM const char** table, int index)
+inline void LogPrintLn(const char** table, int index)
 {
-    char* ptr = (char*)pgm_read_word(&(table[index]));
-	int len = strlen_P(ptr);
+    int len = strlen(table[index]);
 	char buffer[len+1];
-	strcpy_P(buffer, ptr);
+	strcpy(buffer, table[index]);
     
 	Serial.println(buffer);
 	Serial.flush();

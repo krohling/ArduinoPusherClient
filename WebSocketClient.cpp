@@ -24,22 +24,22 @@
 
 #include "WebSocketClient.h"
 
-prog_char stringVar[] PROGMEM = "$";
-prog_char clientHandshakeLine1[] PROGMEM = "GET $ HTTP/1.1";
-prog_char clientHandshakeLine2[] PROGMEM = "Upgrade: WebSocket";
-prog_char clientHandshakeLine3[] PROGMEM = "Connection: Upgrade";
-prog_char clientHandshakeLine4[] PROGMEM = "Host: $";
-prog_char clientHandshakeLine5[] PROGMEM = "Origin: ArduinoWebSocketClient";
-prog_char serverHandshake[] PROGMEM = "HTTP/1.1 101";
+const char stringVar[]  = "$";
+const char clientHandshakeLine1[]  = "GET $ HTTP/1.1";
+const char clientHandshakeLine2[]  = "Upgrade: WebSocket";
+const char clientHandshakeLine3[]  = "Connection: Upgrade";
+const char clientHandshakeLine4[]  = "Host: $";
+const char clientHandshakeLine5[]  = "Origin: ArduinoWebSocketClient";
+const char serverHandshake[]  = "HTTP/1.1 101";
 
-prog_char logConnectingWS[] PROGMEM = 			"Connecting to host.";
-prog_char logConnectionFailedWS[] PROGMEM = 	"Connection to host failed.";
-prog_char logHandShakingWS[] PROGMEM = 			"Handshaking.";
-prog_char logHandShakingFailedWS[] PROGMEM = 	"Handshaking failed.";
-prog_char logSendingData[] PROGMEM = 			"Sending data: ";
-prog_char logReceivedData[] PROGMEM = 			"Received data: ";
+const char logConnectingWS[]  = 			"Connecting to host.";
+const char logConnectionFailedWS[]  = 	"Connection to host failed.";
+const char logHandShakingWS[]  = 			"Handshaking.";
+const char logHandShakingFailedWS[]  = 	"Handshaking failed.";
+const char logSendingData[]  = 			"Sending data: ";
+const char logReceivedData[]  = 			"Received data: ";
 
-PROGMEM const char* stringTableWebSocket[] =
+const char* stringTableWebSocket[] =
 {   
     stringVar, 				//0
     clientHandshakeLine1,	//1
@@ -50,7 +50,7 @@ PROGMEM const char* stringTableWebSocket[] =
     serverHandshake			//6
 };
 
-PROGMEM const char* logMessageTableWebSocket[] =
+const char* logMessageTableWebSocket[] =
 {   
     logConnectingWS, 			//0
     logConnectionFailedWS, 		//1
@@ -62,10 +62,9 @@ PROGMEM const char* logMessageTableWebSocket[] =
 
 void WebSocketClient::getStringTableItem(int index, String& text)
 {
- 	char* ptr = (char*)pgm_read_word(&(stringTableWebSocket[index]));
-	int len = strlen_P(ptr);
+	int len = strlen(stringTableWebSocket[index]);
 	char buffer[len+1];
-	strcpy_P(buffer, ptr);
+	strcpy(buffer, stringTableWebSocket[index]);
 	text = buffer;
 }
 

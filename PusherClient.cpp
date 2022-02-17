@@ -32,48 +32,48 @@ static HashMap<String, EventDelegate, HASH_SIZE> _bindMap = HashMap<String, Even
 void connectionEstablished(const String& eventName, const String& eventData);
 #endif
 
-prog_char pusherAppId[] PROGMEM = ""; //INSERT YOU API ID HERE
-prog_char pusherKey[] PROGMEM = ""; //INSERT YOU API KEY HERE
-prog_char pusherSecret[] PROGMEM = ""; //INSERT YOU API SECRET HERE
-PROGMEM const char* pusherInfos[] =
+const char pusherAppId[] = ""; //INSERT YOU API ID HERE
+const char pusherKey[] = ""; //INSERT YOU API KEY HERE
+const char pusherSecret[] = ""; //INSERT YOU API SECRET HERE
+const char* pusherInfos[] =
 {   
     pusherAppId,      //0
     pusherKey,	      //1
     pusherSecret,     //2            
 };
 
-prog_char stringVar0[] PROGMEM = "#1";
-prog_char stringVar1[] PROGMEM = "#2";
-prog_char stringVar2[] PROGMEM = "#3";
-prog_char pusherPath[] PROGMEM = "/app/#1?client=js&version=1.9.0";
-prog_char pusherHostname[] PROGMEM = "ws.pusherapp.com";
-prog_char subscribeEventName[] PROGMEM = "pusher:subscribe";
-prog_char subscribeMessage1[] PROGMEM = "{\"channel\":\"#1\"}";
-prog_char subscribeMessage2[] PROGMEM = "{\"channel\":\"#1\",\"auth\":\"#2\"}";
-prog_char subscribeMessage3[] PROGMEM = "{\"channel\":\"#1\",\"auth\":\"#2\",\"channel_data\":{\"user_id\":#3}}";
-prog_char unsubscribeMessage[] PROGMEM = "{\"channel\":\"#1\"}";
-prog_char triggerEventMessage[] PROGMEM = "{\"event\":\"#1\",\"data\":#2}";
-prog_char triggerEventChannelMessage[] PROGMEM = "{\"event\":\"#1\",\"channel\":\"#3\",\"data\":#2}";
-prog_char eventNameStart[] PROGMEM = "\"event\"";
-prog_char dataNameStart[] PROGMEM = "\"data\"";
-prog_char unsubscribeEventName[] PROGMEM = "pusher:unsubscribe";
-prog_char pingEvent[] PROGMEM = "{\"event\":\"pusher:ping\",\"data\":\"\"}";
-prog_char emptyEventData[] PROGMEM = "\"\"";
-prog_char connectionEstablishedEventName[] PROGMEM = "pusher:connection_established";
-prog_char socketIdName[] PROGMEM = "\"socket_id\"";
-prog_char hexCharacters[] PROGMEM = "0123456789abcdef";
+const char stringVar0[]  = "#1";
+const char stringVar1[]  = "#2";
+const char stringVar2[]  = "#3";
+const char pusherPath[]  = "/app/#1?client=js&version=1.9.0";
+const char pusherHostname[]  = "ws.pusherapp.com";
+const char subscribeEventName[]  = "pusher:subscribe";
+const char subscribeMessage1[]  = "{\"channel\":\"#1\"}";
+const char subscribeMessage2[]  = "{\"channel\":\"#1\",\"auth\":\"#2\"}";
+const char subscribeMessage3[]  = "{\"channel\":\"#1\",\"auth\":\"#2\",\"channel_data\":{\"user_id\":#3}}";
+const char unsubscribeMessage[]  = "{\"channel\":\"#1\"}";
+const char triggerEventMessage[]  = "{\"event\":\"#1\",\"data\":#2}";
+const char triggerEventChannelMessage[]  = "{\"event\":\"#1\",\"channel\":\"#3\",\"data\":#2}";
+const char eventNameStart[]  = "\"event\"";
+const char dataNameStart[]  = "\"data\"";
+const char unsubscribeEventName[]  = "pusher:unsubscribe";
+const char pingEvent[]  = "{\"event\":\"pusher:ping\",\"data\":\"\"}";
+const char emptyEventData[]  = "\"\"";
+const char connectionEstablishedEventName[]  = "pusher:connection_established";
+const char socketIdName[]  = "\"socket_id\"";
+const char hexCharacters[]  = "0123456789abcdef";
 
 #define STRING_BUFFER_SIZE 				85
 #define DEFINE_STRING_BUFFER(name) 		char name[STRING_BUFFER_SIZE];
 
-prog_char logConnectionFailedPC[] PROGMEM = 	"Connection to Pusher failed.";
-prog_char logConnectionSuccessPC[] PROGMEM = 	"Connection to Pusher completed.";
-prog_char logBindEventPC[] PROGMEM = 			"Bound to event ";
-prog_char logSubscribeChannelPC[] PROGMEM = 	"Subscribed to channel ";
-prog_char logAnswerToPing[] PROGMEM = 			"Sending pong event";
-prog_char logTriggeringEvent[] PROGMEM = 		"Triggering event ";
+const char logConnectionFailedPC[]  = 	"Connection to Pusher failed.";
+const char logConnectionSuccessPC[]  = 	"Connection to Pusher completed.";
+const char logBindEventPC[]  = 			"Bound to event ";
+const char logSubscribeChannelPC[]  = 	"Subscribed to channel ";
+const char logAnswerToPing[]  = 			"Sending pong event";
+const char logTriggeringEvent[]  = 		"Triggering event ";
 
-PROGMEM const char* stringTablePusherClient[] =
+ const char* stringTablePusherClient[] =
 {   
     stringVar0, 				//0
     stringVar1,					//1
@@ -97,7 +97,7 @@ PROGMEM const char* stringTablePusherClient[] =
 	hexCharacters,				//19
 };
 
-PROGMEM const char* logMessageTablePusherClient[] =
+const char* logMessageTablePusherClient[] =
 {   
     logConnectionFailedPC, 		//0
     logConnectionSuccessPC,		//1
@@ -109,19 +109,18 @@ PROGMEM const char* logMessageTablePusherClient[] =
 
 void PusherClient::getStringTableItem(int index, String& text)
 {
-	char* ptr = (char*)pgm_read_word(&(stringTablePusherClient[index]));
-	int len = strlen_P(ptr);
+	
+	int len = strlen(stringTablePusherClient[index]);
 	char buffer[len+1];
-	strcpy_P(buffer, ptr);
+	strcpy(buffer, stringTablePusherClient[index]);
 	text = buffer;
 }
 
 void PusherClient::getPusherInfoItem(int index, String& text)
 {
-	char* ptr = (char*)pgm_read_word(&(pusherInfos[index]));
-	int len = strlen_P(ptr);
+	int len = strlen(pusherInfos[index]);
 	char buffer[len+1];
-	strcpy_P(buffer, ptr);
+	strcpy(buffer, pusherInfos[index]);
 	text = buffer;
 }
 
